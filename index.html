@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>古诗词赏析 - 现代古风版</title> 
+    <title>倚歌 - LLM 驱动的古诗词应用</title> 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
@@ -510,7 +510,7 @@
 
 <body>
     <!-- 音频元素：用于播放背景音乐 -->
-    <audio id="bgMusic" src="./music.mp3" loop preload="auto" autoplay></audio>
+    <audio id="bgMusic" src="./bgm.mp3" loop preload="auto" autoplay></audio>
     <div id="app" v-cloak>
         <transition name="fade" mode="out-in">
             <div v-if="page === 'start'" class="landing-page" @mousedown="triggerRipple" @mousemove="triggerRipple" key="start">
