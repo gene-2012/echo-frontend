@@ -355,6 +355,20 @@
         
         .btn-jianshang-animation { animation: jianshang-btn-animation 0.6s ease-out; }
         
+        @keyframes jianyi-btn-animation {
+            0% { transform: scale(1); box-shadow: 0 12px 40px rgba(0,0,0,0.06); }
+            50% { transform: scale(1.05); box-shadow: 0 15px 50px rgba(52, 152, 219, 0.2); }
+            100% { transform: scale(1); box-shadow: 0 12px 40px rgba(0,0,0,0.06); }
+        }
+        .btn-jianyi-animation { animation: jianyi-btn-animation 0.6s ease-out; }
+        
+        @keyframes zuozi-btn-animation {
+            0% { transform: scale(1); box-shadow: 0 12px 40px rgba(0,0,0,0.06); }
+            50% { transform: scale(1.05); box-shadow: 0 15px 50px rgba(155, 89, 182, 0.2); }
+            100% { transform: scale(1); box-shadow: 0 12px 40px rgba(0,0,0,0.06); }
+        }
+        .btn-aicreate-animation { animation: zuozi-btn-animation 0.6s ease-out; }
+        
         .fade-enter-active, .fade-leave-active { transition: opacity 0.6s ease; }
         .fade-enter-from, .fade-leave-to { opacity: 0; }
 
@@ -536,6 +550,7 @@
                 <nav class="nav-header">
                     <div class="nav-menu">
                         <div class="nav-item" :class="{active: currentModule === 'jianshang'}" @click="currentModule = 'jianshang'">古诗鉴赏</div>
+                        <div class="nav-item" :class="{active: currentModule === 'chuangzuo'}" @click="currentModule = 'chuangzuo'">创作</div>
                     </div>
                     
                     <!-- 移动端下拉菜单 -->
@@ -545,6 +560,7 @@
                         </button>
                         <div class="nav-dropdown-content" :class="{show: mobileMenuOpen}">
                             <div class="nav-dropdown-item" :class="{active: currentModule === 'jianshang'}" @click="switchModuleAndClose('jianshang')">古诗鉴赏</div>
+                            <div class="nav-dropdown-item" :class="{active: currentModule === 'chuangzuo'}" @click="switchModuleAndClose('chuangzuo')">创作</div>
                         </div>
                     </div>
                     
@@ -573,14 +589,27 @@
                     <!-- 只保留古诗鉴赏模块 -->
                     <div :class="['main-layout', {'jianshang-module': currentModule === 'jianshang'}]">
                         <div class="input-box">
-                            <textarea v-model="userInput" placeholder="在此铺陈墨宝，静候解析..."></textarea>
+                            <!-- 创作模块：修改建议 -->
+                            <div v-if="currentModule === 'chuangzuo' && activeTab === '修改建议'" style="margin-bottom: 15px;">
+                                <input type="text" v-model="poemTitle" placeholder="诗题（选填）" style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 1rem; background: var(--card-white);">
+                            </div>
+                            <!-- 创作模块：作诗 -->
+                            <div v-if="currentModule === 'chuangzuo' && activeTab === '作诗'" style="margin-bottom: 15px;">
+                                <input type="text" v-model="userInput" placeholder="请输入创作主题" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 1rem; background: var(--card-white);">
+                                <input type="text" v-model="poemStyle" placeholder="风格 (选填，如：七言绝句、五言律诗)" style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 1rem; background: var(--card-white);">
+                            </div>
+                            <!-- 古诗鉴赏模块 -->
+                            <textarea v-if="currentModule === 'jianshang'" v-model="userInput" placeholder="在此铺陈墨宝，静候解析..."></textarea>
+                            <!-- 创作模块的textarea -->
+                            <textarea v-if="currentModule === 'chuangzuo' && activeTab === '修改建议'" v-model="userInput" placeholder="在此挥洒墨宝，静候润色..."></textarea>
+                            
                             <div class="action-bar" style="display: flex; justify-content: flex-end; margin-top: 130px;">
-                                <button class="btn-secondary" style="margin-right: auto;" @click="handleRandomClick" :disabled="isPoemLoading || isLoading">
+                                <button v-if="currentModule === 'jianshang'" class="btn-secondary" style="margin-right: auto;" @click="handleRandomClick" :disabled="isPoemLoading || isLoading">
                                     <i :class="['fa-solid', 'fa-wand-magic-sparkles', { 'rotating': isPoemLoading }]"></i> 
                                     {{ isPoemLoading ? '寻觅中...' : '偶遇佳作' }}
                                 </button>
                                 <button class="btn-start-analysis" @click="startAnalysis" :disabled="(!userInput.trim() || isLoading)">
-                                    {{ isLoading ? '推敲中...' : '开始赏析' }}
+                                    {{ isLoading ? (currentModule === 'chuangzuo' && activeTab === '作诗' ? '构思中...' : '推敲中...') : (currentModule === 'chuangzuo' ? (activeTab === '作诗' ? '开始作诗' : '开始润色') : '开始赏析') }}
                                 </button>
                             </div>
                         </div>
@@ -669,7 +698,7 @@
 
     <script>
         const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
-        const API_BASE_URL = 'https://eb.geneluo.fun';
+        const API_BASE_URL = 'http://localhost:8000';
 
         createApp({
             setup() {
@@ -677,6 +706,8 @@
                 const currentModule = ref('jianshang'); // 只保留古诗鉴赏模块
                 const activeTab = ref('');
                 const userInput = ref('');
+                const poemTitle = ref('');
+                const poemStyle = ref('');
                 const outputContent = ref('');
                 
                 const isLoading = ref(false); 
@@ -705,7 +736,8 @@
                 const mobileMenuOpen = ref(false);
                 
                 const tabsMap = {
-                    jianshang: ['翻译', '赏析', '作者', '创作背景']
+                    jianshang: ['翻译', '赏析', '作者', '创作背景'],
+                    chuangzuo: ['修改建议', '作诗']
                 };
 
                 const currentTabs = computed(() => {
@@ -719,6 +751,9 @@
                     switch (currentModule.value) {
                         case 'jianshang':
                             return '寄蜉蝣于天地，渺沧海之一粟';
+                        case 'chuangzuo':
+                            if (activeTab.value === '修改建议') return '字斟句酌，方显匠心';
+                            return '以文会友，以诗传情';
                     }
                 });
                 
@@ -789,6 +824,14 @@
                                 endpoint = '/api/v1/poem/details/author-predict';
                                 body = { content: userInput.value };
                             } else endpoint = '/api/v1/poem/details/background';
+                        } else if (currentModule.value === 'chuangzuo') {
+                            if (activeTab.value === '修改建议') {
+                                endpoint = '/api/v1/poem/advice';
+                                body = { title: poemTitle.value, content: userInput.value };
+                            } else {
+                                endpoint = '/api/v1/poem/generate';
+                                body = { topic: userInput.value, style: poemStyle.value };
+                            }
                         }
 
                         const res = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -819,7 +862,8 @@
                     hasStartedAnalysis.value = true;
                     
                     // 添加按钮动画效果
-                    const btnClass = currentModule.value === 'jianshang' ? 'btn-jianshang-animation' : '';
+                    const btnClass = currentModule.value === 'jianshang' ? 'btn-jianshang-animation' : 
+                                     currentModule.value === 'chuangzuo' ? 'btn-jianyi-animation' : '';
                     
                     // 查找当前模块的主要按钮并添加动画类
                     setTimeout(() => {
@@ -1009,7 +1053,7 @@
                 };
 
                 watch(activeTab, () => { if (hasStartedAnalysis.value) handleAnalysis(); });
-                watch(currentModule, () => { hasStartedAnalysis.value = false; outputContent.value = ''; userInput.value = ''; });
+                watch(currentModule, () => { hasStartedAnalysis.value = false; outputContent.value = ''; userInput.value = ''; poemTitle.value = ''; poemStyle.value = ''; });
 
                 // 组件挂载时添加事件监听器
                 onMounted(() => {
@@ -1026,7 +1070,7 @@
                 setupAutoPlay(); // 设置自动播放
 
                 return {
-                    page, currentModule, activeTab, userInput, outputContent,
+                    page, currentModule, activeTab, userInput, poemTitle, poemStyle, outputContent,
                     isLoading, isPoemLoading, isRefreshing, isFeedbackLoading,
                     errorMessage, currentTabs, currentList, traceId,
                     hasStartedAnalysis, feedbackStatus,
