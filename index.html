@@ -280,14 +280,14 @@
         #bgVideo {
             width: 300px;       /* 修正宽度，不再巨型 */
             position: absolute;
-            animation: boatMoveLeft 60s linear infinite;
+            animation: boatMoveLeft 90s linear infinite;
         }
 
         @keyframes boatMoveLeft {
-            /* 进入阶段：从右侧淡入 */
+            /* 进入阶段：从右侧淡入（更快） */
             0% { transform: translateX(110vw) translateY(0px); opacity: 0; }
-            10% { transform: translateX(100vw) translateY(0px); opacity: 0.7; }
-            90% { transform: translateX(20vw) translateY(0px); opacity: 0.7; }
+            5% { transform: translateX(80vw) translateY(0px); opacity: 0.7; }
+            95% { transform: translateX(20vw) translateY(0px); opacity: 0.7; }
 
             100% { transform: translateX(-400px) translateY(0px); opacity: 0; }
         }
@@ -355,25 +355,85 @@
         
         .btn-jianshang-animation { animation: jianshang-btn-animation 0.6s ease-out; }
         
-        @keyframes jianyi-btn-animation {
-            0% { transform: scale(1); box-shadow: 0 12px 40px rgba(0,0,0,0.06); }
-            50% { transform: scale(1.05); box-shadow: 0 15px 50px rgba(52, 152, 219, 0.2); }
-            100% { transform: scale(1); box-shadow: 0 12px 40px rgba(0,0,0,0.06); }
-        }
-        .btn-jianyi-animation { animation: jianyi-btn-animation 0.6s ease-out; }
-        
-        @keyframes zuozi-btn-animation {
-            0% { transform: scale(1); box-shadow: 0 12px 40px rgba(0,0,0,0.06); }
-            50% { transform: scale(1.05); box-shadow: 0 15px 50px rgba(155, 89, 182, 0.2); }
-            100% { transform: scale(1); box-shadow: 0 12px 40px rgba(0,0,0,0.06); }
-        }
-        .btn-aicreate-animation { animation: zuozi-btn-animation 0.6s ease-out; }
-        
         .fade-enter-active, .fade-leave-active { transition: opacity 0.6s ease; }
         .fade-enter-from, .fade-leave-to { opacity: 0; }
 
         /* Vue指令v-cloak的样式，用于防止Vue初始化时闪烁 */
         [v-cloak] { display: none; }
+        
+        /* 水墨效果样式 */
+        .brush-container {
+            --brush-percent: 0%; /* JS 将修改此值 (0-100) */
+            position: relative;
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f4f0e6; /* 宣纸本色 */
+            font-family: "Kaiti", "楷体", serif;
+        }
+
+        /* 文字标签 */
+        .brush-label {
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* 墨痕轨道（淡淡的水渍底色） */
+        .brush-track {
+            position: relative;
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 2px;
+        }
+
+        /* 核心墨痕样式 */
+        .brush-line {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: var(--brush-percent);
+            background: #1a1a1a;
+            
+            /* box-shadow 增强飞白感 */
+            box-shadow: 
+                0px 0px 1px 1px rgba(0,0,0,0.3), 
+                0px 0px 2px 2px rgba(0,0,0,0.1), 
+                -2px -2px 0 0px rgba(0,0,0,0.05);
+            
+            transform: skewX(-15deg); /* 调整为负向倾斜，更像横向运笔 */
+            opacity: 0.9;
+            transition: width 1.5s linear;
+        }
+
+        /* 模拟落笔的“墨点” */
+        .brush-line::before {
+            content: '';
+            position: absolute;
+            left: -2px;
+            top: -2px;
+            width: 8px;
+            height: 8px;
+            background: #000;
+            border-radius: 50%;
+            box-shadow: 0 0 4px rgba(0,0,0,0.5);
+        }
+
+        /* 模拟收笔的“枯笔”效果 */
+        .brush-line::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 0;
+            width: 15px;
+            height: 100%;
+            /* 渐变消失，模拟墨尽 */
+            background: linear-gradient(90deg, transparent, #f4f0e6); 
+        }
         
         /* 折叠菜单样式 */
         .mobile-nav-toggle {
@@ -528,29 +588,28 @@
     <div id="app" v-cloak>
         <transition name="fade" mode="out-in">
             <div v-if="page === 'start'" class="landing-page" @mousedown="triggerRipple" @mousemove="triggerRipple" key="start">
-                <!-- 视频：泛舟画面 -->
-                <div class="boat-container">
-                    <video id="bgVideo" src="video_compressed.mp4" autoplay loop muted playsinline></video>
-                </div>
                 
                 <!-- 桌面端登录内容 -->
                 <div class="landing-content desktop-landing-content">
                     <img src="YIGE.png" alt="Logo" style="max-width: 800px; margin-bottom: 1rem;">
-                    <h1 class="landing-title" style="font-size: 3rem; letter-spacing: 3rem; margin-right: -3rem; margin-bottom: 1.5rem;">古诗词赏析</h1>
+                    <h1 class="landing-title" style="font-size: 3rem; letter-spacing: 3rem; margin-right: -3rem; margin-bottom: 1.5rem;">雅诗赋律</h1>
                     <button class="btn-start" style="padding: 12px 40px; font-size: 1rem; letter-spacing: 2px;" @click.stop="page = 'app'">探 寻</button>
+                    <p style="margin-top: 2.5rem; font-size: 0.6rem; color: var(--text-light); letter-spacing: 2px;">made by ZGCA 少年AI学院</p>
                 </div>
                 
                 <!-- 移动端登录内容 -->
                 <div class="mobile-landing-content">
                     <img src="YIGE_UD.png" alt="Logo" style="max-width: 300px; height: 50%; margin-bottom: 1rem;">
-                    <h1 class="landing-title" style="font-size: 2rem; letter-spacing: 2rem; align-items: center; margin-right: -2rem; margin-bottom: 1.5rem;">古诗词赏析</h1>
+                    <h1 class="landing-title" style="font-size: 2rem; letter-spacing: 2rem; align-items: center; margin-right: -2rem; margin-bottom: 1.5rem;">雅诗赋律</h1>
                     <button class="btn-start" style="padding: 12px 40px; font-size: 1rem; letter-spacing: 2px;" @click.stop="page = 'app'">探 寻</button>
+                    <p style="margin-top: 2.5rem; font-size: 0.6rem; color: var(--text-light); letter-spacing: 2px;">made by ZGCA 少年AI学院</p>
                 </div> 
             </div><div v-else key="app">
                 <nav class="nav-header">
                     <div class="nav-menu">
                         <div class="nav-item" :class="{active: currentModule === 'jianshang'}" @click="currentModule = 'jianshang'">古诗鉴赏</div>
-                        <div class="nav-item" :class="{active: currentModule === 'chuangzuo'}" @click="currentModule = 'chuangzuo'">创作</div>
+                        <div class="nav-item" :class="{active: currentModule === 'jianyi'}" @click="currentModule = 'jianyi'">作诗润色</div>
+                        <div class="nav-item" :class="{active: currentModule === 'aicreate'}" @click="currentModule = 'aicreate'">AI创作</div>
                     </div>
                     
                     <!-- 移动端下拉菜单 -->
@@ -560,7 +619,8 @@
                         </button>
                         <div class="nav-dropdown-content" :class="{show: mobileMenuOpen}">
                             <div class="nav-dropdown-item" :class="{active: currentModule === 'jianshang'}" @click="switchModuleAndClose('jianshang')">古诗鉴赏</div>
-                            <div class="nav-dropdown-item" :class="{active: currentModule === 'chuangzuo'}" @click="switchModuleAndClose('chuangzuo')">创作</div>
+                            <div class="nav-dropdown-item" :class="{active: currentModule === 'jianyi'}" @click="switchModuleAndClose('jianyi')">作诗润色</div>
+                            <div class="nav-dropdown-item" :class="{active: currentModule === 'aicreate'}" @click="switchModuleAndClose('aicreate')">AI创作</div>
                         </div>
                     </div>
                     
@@ -582,50 +642,130 @@
                     <!-- 提示文字 -->
                     <div style="text-align: center; margin-bottom: 30px; color: var(--accent-green); font-family: 'Noto Serif SC', serif;">
                         <p style="font-size: 1.2rem; margin-bottom: 10px;">
-                            <i class="fa-solid fa-quote-left"></i> {{ currentModuleText }} <i class="fa-solid fa-quote-right"></i>
+                            {{ currentModuleText }}
                         </p>
                     </div>
                     
-                    <!-- 只保留古诗鉴赏模块 -->
-                    <div :class="['main-layout', {'jianshang-module': currentModule === 'jianshang'}]">
-                        <div class="input-box">
-                            <!-- 创作模块：修改建议 -->
-                            <div v-if="currentModule === 'chuangzuo' && activeTab === '修改建议'" style="margin-bottom: 15px;">
-                                <input type="text" v-model="poemTitle" placeholder="诗题（选填）" style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 1rem; background: var(--card-white);">
+                    <!-- AI创作模块的特殊布局 -->
+                    <div v-if="currentModule === 'aicreate'" class="main-layout">
+                        <!-- 左侧：用户输入区域 -->
+                        <div class="input-box" style="height: 100%; display: flex; flex-direction: column;">
+                            <h4 style="color: var(--accent-green); margin-bottom: 15px; font-family: 'Noto Serif SC', serif; font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
+                                <i class="fa-solid fa-pen-to-square" style="font-size: 1.3rem;"></i>
+                                <span>输入创作要求</span>
+                            </h4>
+                            <textarea v-model="userInput" placeholder="请描述您想要的诗词风格、主题、意境等要求..." style="flex: 1; min-height: 200px;"></textarea>
+                            <div class="action-bar" style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                                <button class="btn-start-analysis" @click="startAnalysis" :disabled="!userInput.trim() || isLoading">
+                                    {{ isLoading ? '生成中...' : '开始生成' }}
+                                </button>
                             </div>
-                            <!-- 创作模块：作诗 -->
-                            <div v-if="currentModule === 'chuangzuo' && activeTab === '作诗'" style="margin-bottom: 15px;">
-                                <input type="text" v-model="userInput" placeholder="请输入创作主题" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 1rem; background: var(--card-white);">
-                                <input type="text" v-model="poemStyle" placeholder="风格 (选填，如：七言绝句、五言律诗)" style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 1rem; background: var(--card-white);">
+                        </div>
+
+                        <!-- 右侧：AI生成区域 -->
+                        <div class="output-box">
+                            <!-- 左上角标题区域 -->
+                            <div style="padding: 20px 35px 15px; border-bottom: 1px solid #F1F4F6; margin-bottom: 0;">
+                                <h4 style="color: var(--accent-green); font-family: 'Noto Serif SC', serif; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; margin-bottom: 0;">
+                                    <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 1.3rem;"></i>
+                                    <span>AI创作结果</span>
+                                </h4>
                             </div>
-                            <!-- 古诗鉴赏模块 -->
-                            <textarea v-if="currentModule === 'jianshang'" v-model="userInput" placeholder="在此铺陈墨宝，静候解析..."></textarea>
-                            <!-- 创作模块的textarea -->
-                            <textarea v-if="currentModule === 'chuangzuo' && activeTab === '修改建议'" v-model="userInput" placeholder="在此挥洒墨宝，静候润色..."></textarea>
-                            
-                            <div class="action-bar" style="display: flex; justify-content: flex-end; margin-top: 130px;">
-                                <button v-if="currentModule === 'jianshang'" class="btn-secondary" style="margin-right: auto;" @click="handleRandomClick" :disabled="isPoemLoading || isLoading">
+                            <div class="content-area" style="min-height: 280px;">
+                                <div v-if="!hasStartedAnalysis" style="color: #BDC3C7; text-align: center; margin-top: 60px;">
+                                    <p style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"><i class="fa-solid fa-lightbulb"></i></p>
+                                    <p>请输入创作要求，AI将为您生成诗词</p>
+                                </div>
+                                
+                                <div v-else-if="isLoading" style="color: var(--accent-green); text-align: center; margin-top: 60px;">
+                                    <i class="fa-solid fa-feather-pointed fa-spin"></i> 正在创作中，请稍候...
+                                </div>
+
+                                <div v-else-if="errorMessage" style="color: #e74c3c; background: #fdf2f2; padding: 15px; border-radius: 8px;">
+                                    <i class="fa-solid fa-circle-exclamation"></i> {{ errorMessage }}
+                                </div>
+
+                                <div v-else>
+                                    <div style="white-space: pre-wrap; animation: fadeIn 0.8s ease; font-size: 1.2rem; line-height: 2;">{{ outputContent }}</div>
+                                    
+                                    <div v-if="outputContent && traceId" class="feedback-container">
+                                        <span style="font-size: 0.85rem; color: #999;">
+                                            {{ isFeedbackLoading ? '记录中...' : '此番创作可还中意？' }}
+                                        </span>
+                                        <button class="feedback-btn" :class="{active: feedbackStatus === 'good'}" 
+                                                @click="submitFeedback(true)" :disabled="feedbackStatus !== null || isFeedbackLoading">
+                                            <i :class="['fa-solid', feedbackStatus === 'good' ? 'fa-check' : 'fa-thumbs-up']"></i> 满意
+                                        </button>
+                                        <button class="feedback-btn" :class="{active: feedbackStatus === 'bad'}" 
+                                                @click="submitFeedback(false)" :disabled="feedbackStatus !== null || isFeedbackLoading">
+                                            <i class="fa-solid fa-thumbs-down"></i> 改进
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- 反馈建议框 -->
+                                <div v-if="showFeedbackDialog" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                                    <div style="background: var(--card-white); padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: var(--soft-shadow);">
+                                        <h3 style="color: var(--accent-green); margin-bottom: 20px; font-family: 'Noto Serif SC', serif;">反馈建议</h3>
+                                        <p style="margin-bottom: 20px; color: var(--text-main);">感谢您的反馈！如果您有更多建议或意见，欢迎在此输入：</p>
+                                        <textarea v-model="feedbackComment" style="width: 100%; height: 120px; padding: 15px; border: 1px solid var(--border-light); border-radius: 8px; resize: none; font-family: 'Noto Serif SC', serif; font-size: 1rem; margin-bottom: 20px;"></textarea>
+                                        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                                            <button style="padding: 10px 20px; border: 1px solid var(--accent-green); background: transparent; color: var(--accent-green); border-radius: 4px; cursor: pointer;" @click="showFeedbackDialog = false">取消</button>
+                                            <button style="padding: 10px 20px; background: var(--accent-green); color: white; border: none; border-radius: 4px; cursor: pointer;" @click="submitFeedbackComment" :disabled="isFeedbackLoading">{{ isFeedbackLoading ? '提交中...' : '提交' }}</button>
+                                        </div>
+                                    </div>
+                            </div>
+                            <!-- 底部按钮区域 -->
+                            <div style="padding: 15px 35px 20px;">
+                                <div class="action-bar" style="display: flex; justify-content: flex-end;">
+                                    <button class="btn-secondary" @click="startAnalysis" :disabled="isLoading || !outputContent">
+                                        <i class="fa-solid fa-rotate"></i> 重新生成
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 原有布局：古诗鉴赏和创作建议 -->
+                    <div v-else :class="['main-layout', {'jianshang-module': currentModule === 'jianshang', 'jianyi-module': currentModule === 'jianyi'}]">
+                        <div class="input-box" style="height: 100%; display: flex; flex-direction: column;">
+                            <h4 style="color: var(--accent-green); margin-bottom: 15px; font-family: 'Noto Serif SC', serif; font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
+                                <i class="fa-solid" :class="currentModule === 'jianyi' ? 'fa-feather' : 'fa-scroll'" style="font-size: 1.3rem;"></i>
+                                <span>{{ currentModule === 'jianyi' ? '输入诗词内容' : '输入古诗内容' }}</span>
+                            </h4>
+                            <div v-if="currentModule === 'jianyi'" style="margin-bottom: 15px;">
+                                <input type="text" v-model="poemTitle" placeholder="请输入诗题..." style="width: 100%; padding: 10px; border: 1px solid #EEE; border-radius: 4px; font-family: 'Noto Serif SC', serif; font-size: 1rem; margin-bottom: 10px;">
+                            </div>
+                            <textarea v-model="userInput" :placeholder="currentModule === 'jianyi' ? '在此挥毫泼墨，静待指点...' : '在此铺陈墨宝，静候解析...'" style="flex: 1; min-height: 200px;"></textarea>
+                            <div class="action-bar" style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                                <button v-if="currentModule !== 'jianyi'" class="btn-secondary" style="margin-right: auto;" @click="handleRandomClick" :disabled="isPoemLoading || isLoading">
                                     <i :class="['fa-solid', 'fa-wand-magic-sparkles', { 'rotating': isPoemLoading }]"></i> 
                                     {{ isPoemLoading ? '寻觅中...' : '偶遇佳作' }}
                                 </button>
-                                <button class="btn-start-analysis" @click="startAnalysis" :disabled="(!userInput.trim() || isLoading)">
-                                    {{ isLoading ? (currentModule === 'chuangzuo' && activeTab === '作诗' ? '构思中...' : '推敲中...') : (currentModule === 'chuangzuo' ? (activeTab === '作诗' ? '开始作诗' : '开始润色') : '开始赏析') }}
+                                <button class="btn-start-analysis" @click="startAnalysis" :disabled="!userInput.trim() || isLoading">
+                                    {{ isLoading ? '推敲中...' : currentModule === 'jianyi' ? '寻求指点' : '开始赏析' }}
                                 </button>
                             </div>
                         </div>
 
                         <div class="output-box">
-                            <div class="tab-bar">
-                                <button v-for="tab in currentTabs" 
-                                        :class="['tab-btn', {active: activeTab === tab}]"
-                                        @click="activeTab = tab">
-                                    {{ tab }}
-                                </button>
+                            <!-- 左上角标题区域 -->
+                            <div style="padding: 20px 35px 15px; border-bottom: 1px solid #F1F4F6; margin-bottom: 0;">
+                                <h4 style="color: var(--accent-green); font-family: 'Noto Serif SC', serif; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; margin-bottom: 0;">
+                                    <i class="fa-solid" :class="currentModule === 'jianyi' ? 'fa-pen-to-square' : 'fa-book-open'" style="font-size: 1.3rem;"></i>
+                                    <span>{{ currentModule === 'jianyi' ? '创作建议' : '古诗鉴赏' }}</span>
+                                </h4>
                             </div>
-                            <div class="content-area">
-                                <div v-if="!hasStartedAnalysis" style="color: #BDC3C7; text-align: center; margin-top: 80px;">
-                                    <p style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"><i class="fa-solid fa-scroll"></i></p>
-                                    <p>待君输入诗句，方能品鉴其中意境</p>
+                            <div class="content-area" style="min-height: 280px;">
+                                <div v-if="!hasStartedAnalysis" :class="['empty-state', {'jianshang-empty': currentModule === 'jianshang', 'jianyi-empty': currentModule === 'jianyi'}]" style="color: #BDC3C7; text-align: center; margin-top: 40px;">
+                                    <div v-if="currentModule === 'jianshang'">
+                                        <p style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"><i class="fa-solid fa-scroll"></i></p>
+                                        <p>腹有诗书气自华，静待君来赏雅韵</p>
+                                    </div>
+                                    <div v-else>
+                                        <p style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"><i class="fa-solid fa-feather"></i></p>
+                                        <p>妙笔生花著华章，挥毫泼墨展才情</p>
+                                    </div>
                                 </div>
                                 
                                 <div v-else-if="isLoading" style="color: var(--accent-green); text-align: center; margin-top: 50px;">
@@ -639,7 +779,7 @@
                                 <div v-else>
                                     <div style="white-space: pre-wrap; animation: fadeIn 0.8s ease;">{{ outputContent }}</div>
                                     
-                                    <div v-if="outputContent && traceId" class="feedback-container">
+                                    <div v-if="outputContent && traceId && currentModule === 'jianshang'" class="feedback-container">
                                         <span style="font-size: 0.85rem; color: #999;">
                                             {{ isFeedbackLoading ? '记录中...' : '此番解析可还中意？' }}
                                         </span>
@@ -653,12 +793,33 @@
                                         </button>
                                     </div>
                                 </div>
+                                
+                                <!-- 反馈建议框 -->
+                                <div v-if="showFeedbackDialog" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                                    <div style="background: var(--card-white); padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: var(--soft-shadow);">
+                                        <h3 style="color: var(--accent-green); margin-bottom: 20px; font-family: 'Noto Serif SC', serif;">反馈建议</h3>
+                                        <p style="margin-bottom: 20px; color: var(--text-main);">感谢您的反馈！如果您有更多建议或意见，欢迎在此输入：</p>
+                                        <textarea v-model="feedbackComment" style="width: 100%; height: 120px; padding: 15px; border: 1px solid var(--border-light); border-radius: 8px; resize: none; font-family: 'Noto Serif SC', serif; font-size: 1rem; margin-bottom: 20px;"></textarea>
+                                        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                                            <button style="padding: 10px 20px; border: 1px solid var(--accent-green); background: transparent; color: var(--accent-green); border-radius: 4px; cursor: pointer;" @click="showFeedbackDialog = false">取消</button>
+                                            <button style="padding: 10px 20px; background: var(--accent-green); color: white; border: none; border-radius: 4px; cursor: pointer;" @click="submitFeedbackComment" :disabled="isFeedbackLoading">{{ isFeedbackLoading ? '提交中...' : '提交' }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 底部按钮区域 -->
+                            <div style="padding: 15px 35px 20px;">
+                                <div class="action-bar" style="display: flex; justify-content: flex-end;">
+                                    <button class="btn-secondary" @click="startAnalysis" :disabled="isLoading || !outputContent">
+                                        <i class="fa-solid fa-rotate"></i> 重新分析
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 推荐卡片区域：仅在古诗鉴赏模块显示 -->
-                    <section class="card-section">
+                    <!-- 推荐卡片区域：仅在古诗鉴赏和创作建议模块显示 -->
+                    <section v-if="currentModule !== 'aicreate'" class="card-section">
                         <div v-if="showFullPoem">
                             <button class="btn-secondary" style="margin-bottom: 20px;" @click="showFullPoem = false; fullPoemContent = '';">
                                 <i class="fa-solid fa-arrow-left"></i> 返回推荐
@@ -675,7 +836,7 @@
                         <div v-else>
                             <h3 class="ancient-font" style="font-size: 1.5rem; margin-bottom: 20px; display: flex; align-items: center;">
                                 <span style="width: 4px; height: 24px; background: var(--accent-green); display: inline-block; margin-right: 12px;"></span>
-                                推荐品读
+                                {{ currentModule === 'jianshang' ? '推荐品读' : '创作素材' }}
                             </h3>
                             <div class="card-grid">
                                 <div class="card" v-for="item in currentList" :key="item.title" 
@@ -703,11 +864,10 @@
         createApp({
             setup() {
                 const page = ref('start');
-                const currentModule = ref('jianshang'); // 只保留古诗鉴赏模块
+                const currentModule = ref('jianshang');
                 const activeTab = ref('');
                 const userInput = ref('');
                 const poemTitle = ref('');
-                const poemStyle = ref('');
                 const outputContent = ref('');
                 
                 const isLoading = ref(false); 
@@ -720,12 +880,23 @@
                 const traceId = ref('');
                 const hasStartedAnalysis = ref(false);
                 const feedbackStatus = ref(null);
+                const brushLine = ref(null);
+                const accuracy = ref(0);
                 
                 // 全诗详情页相关变量
                 const showFullPoem = ref(false);
                 const fullPoemTitle = ref('');
                 const fullPoemAuthor = ref('');
                 const fullPoemContent = ref('');
+                
+                // 反馈建议框相关变量
+                const showFeedbackDialog = ref(false);
+                const feedbackComment = ref('');
+                
+                // pairwise 相关变量
+                const showPairwise = ref(false);
+                const pairwiseOptions = ref([]);
+                const selectedOption = ref(0);
                 
                 // 音乐控制相关变量
                 const isMusicPlaying = ref(false);
@@ -736,8 +907,9 @@
                 const mobileMenuOpen = ref(false);
                 
                 const tabsMap = {
-                    jianshang: ['翻译', '赏析', '作者', '创作背景'],
-                    chuangzuo: ['修改建议', '作诗']
+                    jianshang: ['赏析'],
+                    jianyi: ['创作建议'],
+                    aicreate: ['AI创作']
                 };
 
                 const currentTabs = computed(() => {
@@ -751,9 +923,10 @@
                     switch (currentModule.value) {
                         case 'jianshang':
                             return '寄蜉蝣于天地，渺沧海之一粟';
-                        case 'chuangzuo':
-                            if (activeTab.value === '修改建议') return '字斟句酌，方显匠心';
-                            return '以文会友，以诗传情';
+                        case 'jianyi':
+                            return '纵一苇之所如，凌万顷之茫然';
+                        case 'aicreate':
+                            return '举酒属客，诵明月之诗，歌窈窕之章';
                     }
                 });
                 
@@ -818,20 +991,17 @@
                         let body = { content: userInput.value };
 
                         if (currentModule.value === 'jianshang') {
-                            if (activeTab.value === '翻译') { endpoint = '/api/v1/poem/translate'; body.query = []; }
-                            else if (activeTab.value === '赏析') endpoint = '/api/v1/poem/appreciation';
-                            else if (activeTab.value === '作者') {
-                                endpoint = '/api/v1/poem/details/author-predict';
-                                body = { content: userInput.value };
-                            } else endpoint = '/api/v1/poem/details/background';
-                        } else if (currentModule.value === 'chuangzuo') {
-                            if (activeTab.value === '修改建议') {
-                                endpoint = '/api/v1/poem/advice';
-                                body = { title: poemTitle.value, content: userInput.value };
-                            } else {
-                                endpoint = '/api/v1/poem/generate';
-                                body = { topic: userInput.value, style: poemStyle.value };
-                            }
+                            // 默认使用赏析功能
+                            endpoint = '/api/v1/poem/appreciation';
+                        } else if (currentModule.value === 'jianyi') {
+                            // 默认使用创作建议功能
+                            const title = poemTitle.value || '无题';
+                            endpoint = '/api/v1/poem/advice';
+                            body = { title: title, content: userInput.value };
+                        } else {
+                            // AI创作模块：调用AI创作接口
+                            endpoint = '/api/v1/poem/generate';
+                            body = { topic: userInput.value };
                         }
 
                         const res = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -842,17 +1012,14 @@
                         const data = await res.json();
                         
                         if (data) {
-                            traceId.value = data.trace_id || '';
-                            if (activeTab.value === '翻译') outputContent.value = data.result.join('\n');
-                            else if (activeTab.value === '作者') outputContent.value = `朝代：${data.dynasty}\n作者：${data.author}\n${data.introduction ? '简介：' + data.introduction : ''}`;
-                            else outputContent.value = data.result;
+                            traceId.value = data.trace_id || `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                            outputContent.value = data.result;
                         }
                     } catch (e) {
                         errorMessage.value = "思绪中断，请稍后再试";
                     } finally {
                         isLoading.value = false;
-                        // 分析完成后更新推荐列表
-                        if (userInput.value.trim()) {
+                        if (userInput.value.trim() && currentModule.value !== 'aicreate') {
                             updateRecommendList(userInput.value);
                         }
                     }
@@ -863,7 +1030,8 @@
                     
                     // 添加按钮动画效果
                     const btnClass = currentModule.value === 'jianshang' ? 'btn-jianshang-animation' : 
-                                     currentModule.value === 'chuangzuo' ? 'btn-jianyi-animation' : '';
+                                   currentModule.value === 'jianyi' ? 'btn-jianyi-animation' : 
+                                   'btn-aicreate-animation';
                     
                     // 查找当前模块的主要按钮并添加动画类
                     setTimeout(() => {
@@ -884,13 +1052,28 @@
                 const handleRandomClick = async () => {
                     isPoemLoading.value = true;
                     try {
-                        const res = await fetch(`${API_BASE_URL}/api/v1/poem/random`);
-                        const data = await res.json();
-                        if (data && data.content) {
-                            userInput.value = data.content;
-                            hasStartedAnalysis.value = false; 
-                            outputContent.value = '';
+                        // 首先调用random接口获取重定向URL
+                        const randomRes = await fetch(`${API_BASE_URL}/api/v1/poem/random`, {
+                            method: 'GET',
+                            redirect: 'follow' // 自动跟随重定向
+                        });
+                        
+                        // 从重定向后的URL中获取id参数
+                        const url = new URL(randomRes.url);
+                        const poemId = url.searchParams.get('id');
+                        
+                        if (poemId) {
+                            // 调用details接口获取古诗详情
+                            const detailsRes = await fetch(`${API_BASE_URL}/api/v1/poem/details?id=${poemId}`);
+                            const data = await detailsRes.json();
+                            if (data && data.content) {
+                                userInput.value = data.content;
+                                hasStartedAnalysis.value = false; 
+                                outputContent.value = '';
+                            }
                         }
+                    } catch (error) {
+                        console.error('获取随机古诗失败:', error);
                     } finally {
                         isPoemLoading.value = false;
                     }
@@ -901,6 +1084,7 @@
                     if (!traceId.value || isFeedbackLoading.value) return;
                     isFeedbackLoading.value = true;
                     try {
+                        // 先提交基本反馈
                         const res = await fetch(`${API_BASE_URL}/api/v1/feedback/submit`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -911,9 +1095,36 @@
                             })
                         });
                         const data = await res.json();
-                        if (data && data.status === 'OK') feedbackStatus.value = isGood ? 'good' : 'bad';
+                        if (data && data.status === 'OK') {
+                            feedbackStatus.value = isGood ? 'good' : 'bad';
+                            // 显示建议框
+                            showFeedbackDialog.value = true;
+                            feedbackComment.value = '';
+                        }
                     } catch (e) {
                         console.error("反馈失败", e);
+                    } finally {
+                        isFeedbackLoading.value = false;
+                    }
+                };
+                
+                // 提交详细反馈建议
+                const submitFeedbackComment = async () => {
+                    if (!traceId.value || isFeedbackLoading.value) return;
+                    isFeedbackLoading.value = true;
+                    try {
+                        await fetch(`${API_BASE_URL}/api/v1/feedback/submit`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                trace_id: traceId.value,
+                                good: feedbackStatus.value === 'good',
+                                comment: feedbackComment.value
+                            })
+                        });
+                        showFeedbackDialog.value = false;
+                    } catch (e) {
+                        console.error("反馈建议提交失败", e);
                     } finally {
                         isFeedbackLoading.value = false;
                     }
@@ -991,15 +1202,38 @@
                 const handleRefreshList = async () => {
                     isRefreshing.value = true;
                     try {
-                        // 调用三次random接口获取随机古诗
+                        // 定义获取单个随机古诗详情的函数
+                        const getRandomPoem = async () => {
+                            try {
+                                // 首先调用random接口获取重定向URL
+                                const randomRes = await fetch(`${API_BASE_URL}/api/v1/poem/random`, {
+                                    method: 'GET',
+                                    redirect: 'follow' // 自动跟随重定向
+                                });
+                                
+                                // 从重定向后的URL中获取id参数
+                                const url = new URL(randomRes.url);
+                                const poemId = url.searchParams.get('id');
+                                
+                                if (poemId) {
+                                    // 调用details接口获取古诗详情
+                                    const detailsRes = await fetch(`${API_BASE_URL}/api/v1/poem/details?id=${poemId}`);
+                                    return await detailsRes.json();
+                                }
+                                return null;
+                            } catch (error) {
+                                console.error('获取随机古诗失败:', error);
+                                return null;
+                            }
+                        };
+                        
+                        // 调用三次获取随机古诗详情
                         const randomPoems = await Promise.all(
-                            Array.from({ length: 3 }, () => 
-                                fetch(`${API_BASE_URL}/api/v1/poem/random`).then(r => r.json())
-                            )
+                            Array.from({ length: 3 }, () => getRandomPoem())
                         );
                         
-                        // 处理返回结果
-                        currentList.value = randomPoems.map(poem => ({
+                        // 处理返回结果，过滤掉null值
+                        currentList.value = randomPoems.filter(poem => poem).map(poem => ({
                             id: poem.id || Math.random(), // 确保有唯一ID
                             title: poem.title || '未知标题',
                             author: poem.author || '未知作者',
@@ -1053,7 +1287,7 @@
                 };
 
                 watch(activeTab, () => { if (hasStartedAnalysis.value) handleAnalysis(); });
-                watch(currentModule, () => { hasStartedAnalysis.value = false; outputContent.value = ''; userInput.value = ''; poemTitle.value = ''; poemStyle.value = ''; });
+                watch(currentModule, () => { hasStartedAnalysis.value = false; outputContent.value = ''; poemTitle.value = ''; userInput.value = ''; });
 
                 // 组件挂载时添加事件监听器
                 onMounted(() => {
@@ -1070,15 +1304,16 @@
                 setupAutoPlay(); // 设置自动播放
 
                 return {
-                    page, currentModule, activeTab, userInput, poemTitle, poemStyle, outputContent,
+                    page, currentModule, activeTab, userInput, poemTitle, outputContent,
                     isLoading, isPoemLoading, isRefreshing, isFeedbackLoading,
                     errorMessage, currentTabs, currentList, traceId,
-                    hasStartedAnalysis, feedbackStatus,
+                    hasStartedAnalysis, feedbackStatus, brushLine, accuracy,
                     showFullPoem, fullPoemTitle, fullPoemAuthor, fullPoemContent,
-                    isMusicPlaying, bgMusic, currentModuleText,
-                    startAnalysis, handleRandomClick, submitFeedback, handleRefreshList, updateRecommendList,
-                    triggerRipple, viewFullPoem, toggleMusic,
-                    windowWidth, isMobileView, mobileMenuOpen, toggleMobileMenu, switchModuleAndClose
+                    showFeedbackDialog, feedbackComment,
+                    showPairwise, pairwiseOptions, selectedOption,
+                    isMusicPlaying, bgMusic, currentModuleText, windowWidth, mobileMenuOpen, isMobileView,
+                    startAnalysis, handleRandomClick, submitFeedback, submitFeedbackComment, handleRefreshList, updateRecommendList,
+                    triggerRipple, viewFullPoem, toggleMusic, toggleMobileMenu, switchModuleAndClose
                 }
             }
         }).mount('#app')
