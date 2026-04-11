@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
-    
+    <link rel="icon" href="favicon.svg">
     <style>
         /* 定义CSS变量区域，用于统一管理页面配色和样式值 */
         :root {
@@ -118,6 +118,7 @@
             max-width: 1000px;
             margin: 0 auto;
             padding: 100px 20px 60px;
+            flex: 1;
         }
         /* 顶部导航栏样式 - 固定在页面顶部 */
         .nav-header {
@@ -594,7 +595,7 @@
                     <img src="YIGE.png" alt="Logo" style="max-width: 800px; margin-bottom: 1rem;">
                     <h1 class="landing-title" style="font-size: 3rem; letter-spacing: 3rem; margin-right: -3rem; margin-bottom: 1.5rem;">雅诗赋律</h1>
                     <button class="btn-start" style="padding: 12px 40px; font-size: 1rem; letter-spacing: 2px;" @click.stop="page = 'app'">探 寻</button>
-                    <p style="margin-top: 2.5rem; font-size: 0.6rem; color: var(--text-light); letter-spacing: 2px;">made by ZGCA 少年AI学院</p>
+                    <p style="margin-top: 2.5rem; font-size: 0.6rem; color: var(--text-light); letter-spacing: 2px;">北京少年人工智能学院 古诗词赏析项目组 倾情奉上</p>
                 </div>
                 
                 <!-- 移动端登录内容 -->
@@ -602,7 +603,7 @@
                     <img src="YIGE_UD.png" alt="Logo" style="max-width: 300px; height: 50%; margin-bottom: 1rem;">
                     <h1 class="landing-title" style="font-size: 2rem; letter-spacing: 2rem; align-items: center; margin-right: -2rem; margin-bottom: 1.5rem;">雅诗赋律</h1>
                     <button class="btn-start" style="padding: 12px 40px; font-size: 1rem; letter-spacing: 2px;" @click.stop="page = 'app'">探 寻</button>
-                    <p style="margin-top: 2.5rem; font-size: 0.6rem; color: var(--text-light); letter-spacing: 2px;">made by ZGCA 少年AI学院</p>
+                    <p style="margin-top: 2.5rem; font-size: 0.6rem; color: var(--text-light); letter-spacing: 2px;">北京少年人工智能学院 古诗词赏析项目组 倾情奉上</p>
                 </div> 
             </div><div v-else key="app">
                 <nav class="nav-header">
@@ -876,6 +877,12 @@
                             </button>
                         </div>
                     </section>
+                    <footer style="margin-top: auto; padding-bottom: 24px;">
+                        <hr style="margin: 40px auto; border: none; border-top: 1px solid var(--border-light); width: 80%;"/>
+                        <p style="text-align: center; color: var(--text-light); font-size: 0.85rem; letter-spacing: 0.5px;">
+                            Made with ❤️ by Beijing Youth AI Academy
+                        </p>
+                    </footer>
                 </main>
             </div>
         </transition>
